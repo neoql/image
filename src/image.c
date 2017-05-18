@@ -29,8 +29,12 @@ void img_destroy(image_t *img)
 
 color_t img_get_color(image_t *img, int x, int y)
 {
-    color_t color;
+    color_t color = {0, 0, 0};
     int index;
+
+    if (x < 0 || x > img->width || y < 0 || y > img->height) {
+        return color;
+    }
 
     index = y * img->width + x;
     color = img->points[index];
@@ -45,6 +49,25 @@ void img_set_color(image_t *img, int x, int y, color_t color)
 
     index = y * img->width + x;
     img->points[index] = color;
+}
+
+
+image_t * img_clone(image_t *img)
+{
+    image_t *dst;
+    color_t color;
+    int i, j;
+
+    dst = create_img(img->height, img->width);
+
+    for (i = 0; i < img->height; i++) {
+        for (j = 0; j < img->width; j++) {
+            color = img_get_color(img, j, i);
+            img_set_color(img, j, j, color);
+        }
+    }
+
+    return dst;
 }
 
 
