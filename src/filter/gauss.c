@@ -188,7 +188,10 @@ int gauss_filter(const image_t *src, image_t *dst, double sigma)
     int radius;
 
     img_init(&tmp, src->height, src->width);
-    img_init(dst, src->height, src->width);
+    if (src != dst) {
+        img_init(dst, src->height, src->width);
+    }
+
     radius = (int) ceil(sigma * 3);
 
     hfilter(&tmp, src, sigma, radius);

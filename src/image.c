@@ -73,6 +73,9 @@ extern int rgb2gray(const image_t *src, image_t *dst)
     uchar gray;
     color_t color;
 
+    if (src != dst) {
+        img_init(dst, src->height, src->width);
+    }
     img_init(dst, src->height, src->width);
     for (i = 0; i < src->height; i++) {
         for (j = 0; j < src->width; j++) {

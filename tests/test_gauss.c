@@ -17,11 +17,11 @@ int main(int argc, char *argv[])
 
     load_bmp(argv[1], &img);
 
-    gauss_filter(&img, &dst, 20);
-    save_as_bmp(&dst, argv[2]);
+    gauss_filter(&img, &img, 50);
+    save_as_bmp(&img, argv[2]);
 
     img_destroy(&img);
-    img_destroy(&dst);
+//    img_destroy(&dst);
 
     return 0;
 }

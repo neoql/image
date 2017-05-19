@@ -4,6 +4,7 @@
 
 #include "filter.h"
 #include <stdlib.h>
+#include <assert.h>
 
 
 /* 冒泡排序 */
@@ -89,6 +90,7 @@ int median_filter(const image_t *src, image_t *dst, int radius)
     int i, j;
     color_t color;
 
+    assert(src != dst);
     img_init(dst, src->height, src->width);
 
     for (i = 0; i < src->width; i++) {

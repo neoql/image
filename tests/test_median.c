@@ -12,7 +12,7 @@ int main(int argc, char* argv[])
 
     load_bmp(argv[1], &img);
 
-    median_filter(&img, &dest, 1);
+    median_filter(&img, &img, 1);
 
     save_as_bmp(&dest, argv[2]);
 
