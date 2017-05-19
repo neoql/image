@@ -7,8 +7,7 @@
 
 #include "image.h"
 
-
-extern image_t * gaussian_filter(image_t *img, double sigma);
-extern image_t * median_filter(image_t *img, uint16 radius);
+extern int gauss_filter(const image_t *src, image_t *dst, double sigma);
+extern int median_filter(const image_t *src, image_t *dst, int radius);
 
 #endif //IMAGE_FILTER_H

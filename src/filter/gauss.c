@@ -45,7 +45,7 @@ static double * get_weight_array(double sigma, int radius, int start, int end)
 }
 
 
-static color_t * get_color_array(image_t *img, int x, int y, int radius, int direct)
+static color_t * get_color_array(const image_t *img, int x, int y, int radius, int direct)
 {
     color_t *ca;
     int len;
@@ -65,10 +65,10 @@ static color_t * get_color_array(image_t *img, int x, int y, int radius, int dir
     for (i = 0; i < len; i++) {
         if (direct) {
             // H
-            ca[i] = img_get_color(img, x + i, y);
+            img_get_color(img, x + i, y, ca + i);
         } else {
             // V
-            ca[i] = img_get_color(img, x, y + i);
+            img_get_color(img, x, y + i, ca + i);
         }
     }
 
@@ -101,7 +101,7 @@ static color_t get_blur_color(color_t *ca, double *wa, int radius)
 }
 
 
-static void hfilter(image_t *dest, image_t *src, double sigma, int radius)
+static void hfilter(image_t *dest, const image_t *src, double sigma, int radius)
 {
     int x, y;
     double* wa, *wsa;
@@ -142,7 +142,7 @@ static void hfilter(image_t *dest, image_t *src, double sigma, int radius)
 }
 
 
-static void vfilter(image_t *dest, image_t *src, double sigma, int radius)
+static void vfilter(image_t *dest, const image_t *src, double sigma, int radius)
 {
     int x, y;
     double* wa, *wsa;
@@ -182,21 +182,19 @@ static void vfilter(image_t *dest, image_t *src, double sigma, int radius)
 }
 
 
-image_t * gaussian_filter(image_t *img, double sigma)
+int gauss_filter(const image_t *src, image_t *dst, double sigma)
 {
-    image_t *dst, *tmp;
-
+    image_t tmp;
     int radius;
 
+    img_init(&tmp, src->height, src->width);
+    img_init(dst, src->height, src->width);
     radius = (int) ceil(sigma * 3);
 
-    tmp = img_clone(img);
-    hfilter(tmp, img, sigma, radius);
+    hfilter(&tmp, src, sigma, radius);
+    vfilter(dst, &tmp, sigma, radius);
 
-    dst = img_clone(tmp);
-    vfilter(dst, tmp, sigma, radius);
+    img_destroy(&tmp);
 
-    img_destroy(tmp);
-
-    return dst;
+    return 0;
 }

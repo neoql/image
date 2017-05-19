@@ -3,15 +3,13 @@
 //
 
 #include "bitmap.h"
-#include "image.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 
-image_t *load_bmp(char *path)
+int load_bmp(const char *path, image_t *img)
 {
-    image_t *img;
     FILE *fp;
     bitmap_t *bmp;
     int x, y;
@@ -49,7 +47,7 @@ image_t *load_bmp(char *path)
     fread(bmp->image, 1, bmp->info_header.biSizeImage, fp);
     fclose(fp);
 
-    img = create_img(bmp->info_header.biHeight, bmp->info_header.biWidth);
+    img_init(img, bmp->info_header.biHeight, bmp->info_header.biWidth);
 
     for (y = 0; y < img->height; y++) {
         for (x = 0; x < img->width; x++) {
@@ -66,11 +64,11 @@ image_t *load_bmp(char *path)
     free(bmp->image);
     free(bmp);
 
-    return img;
+    return 0;
 }
 
 
-void save_as_bmp(image_t *img, char *path)
+int save_as_bmp(const image_t *img, const char *path)
 {
     bitmap_t *bmp;
     color_t color;
@@ -103,7 +101,9 @@ void save_as_bmp(image_t *img, char *path)
     p = bmp->image;
     for (y = img->height - 1; y >= 0; y--) {
         for (x = 0; x < img->width; x++) {
-            color = img_get_color(img, x, y);
+            if (img_get_color(img, x, y, &color)) {
+                bzero(&color, sizeof(color_t));
+            }
             p[2] = color.r;
             p[1] = color.g;
             p[0] = color.b;
@@ -137,4 +137,6 @@ void save_as_bmp(image_t *img, char *path)
     fclose(fp);
     free(bmp->image);
     free(bmp);
+
+    return 0;
 }

@@ -24,7 +24,7 @@ static void sort(int *array, int length)
 }
 
 
-static color_t get_median_rgb(int x, int y, int radius, image_t *img)
+static color_t get_median_rgb(int x, int y, int radius, const image_t *img)
 {
     color_t color;
     int width, height;
@@ -57,7 +57,7 @@ static color_t get_median_rgb(int x, int y, int radius, image_t *img)
 
     for (i = 0; i < width; i++) {
         for (j = 0; j < height; j++) {
-            color = img_get_color(img, i + xoffset, j + yoffset);
+            img_get_color(img, i + xoffset, j + yoffset, &color);
             r[j * width + i] = color.r;
             g[j * width + i] = color.g;
             b[j * width + i] = color.b;
@@ -84,20 +84,19 @@ static color_t get_median_rgb(int x, int y, int radius, image_t *img)
 }
 
 
-image_t * median_filter(image_t *img, uint16 radius)
+int median_filter(const image_t *src, image_t *dst, int radius)
 {
-    image_t *dest;
     int i, j;
     color_t color;
 
-    dest = img_clone(img);
+    img_init(dst, src->height, src->width);
 
-    for (i = 0; i < img->width; i++) {
-        for (j = 0; j < img->height; j++) {
-            color = get_median_rgb(i, j, radius, img);
-            img_set_color(dest, i, j, color);
+    for (i = 0; i < src->width; i++) {
+        for (j = 0; j < src->height; j++) {
+            color = get_median_rgb(i, j, radius, src);
+            img_set_color(dst, i, j, color);
         }
     }
 
-    return dest;
+    return 0;
 }

@@ -6,88 +6,82 @@
 #include <stdlib.h>
 
 
-image_t * create_img(uint32 height, uint32 width)
+int img_init(image_t *img, uint32 height, uint32 width)
 {
-    image_t *img;
-
-    img = malloc(sizeof(image_t));
     img->height = height;
     img->width = width;
 
     img->points = calloc(height * width, sizeof(color_t));
 
-    return img;
+    return 0;
 }
 
 
-void img_destroy(image_t *img)
+int img_destroy(image_t *img)
 {
     free(img->points);
-    free(img);
+    return 0;
 }
 
 
-color_t img_get_color(image_t *img, int x, int y)
+int img_get_color(const image_t *img, int x, int y, color_t *color)
 {
-    color_t color = {0, 0, 0};
     int index;
 
     if (x < 0 || x > img->width || y < 0 || y > img->height) {
-        return color;
+        return -1;
     }
 
     index = y * img->width + x;
-    color = img->points[index];
+    *color = img->points[index];
 
-    return color;
+    return 0;
 }
 
 
-void img_set_color(image_t *img, int x, int y, color_t color)
+int img_set_color(image_t *img, int x, int y, color_t color)
 {
     int index;
 
     index = y * img->width + x;
     img->points[index] = color;
+
+    return 0;
 }
 
 
-image_t * img_clone(image_t *img)
+int img_clone(const image_t *src, image_t *dst)
 {
-    image_t *dst;
     color_t color;
     int i, j;
 
-    dst = create_img(img->height, img->width);
-
-    for (i = 0; i < img->height; i++) {
-        for (j = 0; j < img->width; j++) {
-            color = img_get_color(img, j, i);
-            img_set_color(img, j, j, color);
+    img_init(dst, src->height, src->width);
+    for (i = 0; i < src->height; i++) {
+        for (j = 0; j < src->width; j++) {
+            img_get_color(src, j, i, &color);
+            img_set_color(dst, j, j, color);
         }
     }
 
-    return dst;
+    return 0;
 }
 
 
-image_t * rgb2gray(image_t * img)
+extern int rgb2gray(const image_t *src, image_t *dst)
 {
-    image_t *dst;
     int i, j;
     uchar gray;
     color_t color;
 
-    dst = create_img(img->height, img->width);
-
-    for (i = 0; i < img->height; i++) {
-        for (j = 0; j < img->width; j++) {
-            color = img_get_color(img, j, i);
+    img_init(dst, src->height, src->width);
+    for (i = 0; i < src->height; i++) {
+        for (j = 0; j < src->width; j++) {
+            img_get_color(src, j, i, &color);
             gray = (uchar) (color.r * 0.299 + color.g * 0.587 + color.b * 0.114);
             color.r = color.g = color.b = gray;
             img_set_color(dst, j, i, color);
         }
     }
 
-    return dst;
+    return 0;
 }
