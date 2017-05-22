@@ -8,3 +8,6 @@ target_link_libraries(test_gaussian image)
 
 add_executable(test_median test_median.c)
 target_link_libraries(test_median image)
+
+add_executable(test_bitstring test_bitstring.c)
+target_link_libraries(test_bitstring image)
