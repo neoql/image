@@ -24,5 +24,6 @@ extern int bitstring_append_bit(bitstring_t *str, bit_t bit);
 extern int bitstring_append_byte(bitstring_t *str, uchar byte);
 extern int bitstring_length(const bitstring_t *str);
 extern bit_t bitstring_pop_bit(bitstring_t *str);
+extern int bitstring_pop_bits(bitstring_t *str, bit_t *dst, uint32 n);
 
 #endif //IMAGE_BITSTRING_H

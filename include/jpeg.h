@@ -32,6 +32,8 @@ typedef struct {
     uchar kind;                         // 表类型 0:DC直流 1:AC交流
     uchar total[16];                    // 不同位数的码字数量
     uchar *value;                       // 编码内容,每个叶子节点的权重
+    uint16 first[16];                   // 各个长度的码字的第一个码字的整数值
+    uint16 index[16];                   // 各个长度码字的第一个码字的索引
 } huffman_table_t;
 
 
