@@ -222,13 +222,14 @@ uchar decode_next(bitstring_t *str, huffman_table_t *tab)
     uint16 index;
 
     do {
+        if (len + 1 == 16) {
+            goto END;
+        }
+
         do {
             code <<= 1;
             code |= bitstring_pop_bit(str);
         } while (tab->total[++len] == 0);
-        if (len + 1 == 16) {
-            goto END;
-        }
     } while (code >= tab->first[len]);
 
     do {
