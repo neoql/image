@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <jpeg.h>
 
 
 #define H4BIT(x) ((uchar) ((x & 0xF0) >> 4))
@@ -200,17 +201,22 @@ void read_info(FILE *fp, jpeg_t *jpeg)
 
 void build_huffman_tab(huffman_table_t *tab)
 {
-    int i;
+    uchar i;
     uint16 first = 0, index = 0;
 
     bzero(tab->first, sizeof(uint16) * 16);
     bzero(tab->index, sizeof(uint16) * 16);
+    tab->max_len = 0;
     for (i = 0; i < 16; i++) {
         tab->index[i] = index;
         index += tab->total[i];
 
         tab->first[i] = first;
         first = (first + tab->total[i]) << 1;
+
+        if (tab->total[i] != 0) {
+            tab->max_len = i;
+        }
     }
 }
 
@@ -222,7 +228,7 @@ uchar decode_next(bitstring_t *str, huffman_table_t *tab)
     uint16 index;
 
     do {
-        if (len + 1 == 16) {
+        if (len == tab->max_len) {
             goto END;
         }
 
