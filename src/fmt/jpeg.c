@@ -7,7 +7,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <jpeg.h>
 
 
 #define H4BIT(x) ((uchar) ((x & 0xF0) >> 4))
@@ -322,12 +321,45 @@ void parse_jpeg(jpeg_t *jpeg, image_t *img)
 
         dc = &jpeg->huffman_tab[jpeg->cc[1].dc_huffman_tab];
         ac = &jpeg->huffman_tab[jpeg->cc[1].ac_huffman_tab + 2];
-        parse_color_component(mcus[i].Cr, &jpeg->content, dc, ac);
+        parse_color_component(mcus[i].Cb, &jpeg->content, dc, ac);
 
         dc = &jpeg->huffman_tab[jpeg->cc[2].dc_huffman_tab];
         ac = &jpeg->huffman_tab[jpeg->cc[2].ac_huffman_tab + 2];
-        parse_color_component(mcus[i].Cb, &jpeg->content, dc, ac);
+        parse_color_component(mcus[i].Cr, &jpeg->content, dc, ac);
     }
+
+    for (i = 1; i < total_of_mcus; i++) {
+        mcus[i].Y[0]  += mcus[i - 1].Y[0];
+        mcus[i].Cr[0] += mcus[i - 1].Cr[0];
+        mcus[i].Cb[0] += mcus[i - 1].Cb[0];
+    }
+
+    for (i = 0; i < total_of_mcus; i++) {
+        reverse_quantization(mcus[i].Y, jpeg->quantization_tab[jpeg->cc[0].qt_id]);
+        reverse_quantization(mcus[i].Cr, jpeg->quantization_tab[jpeg->cc[1].qt_id]);
+        reverse_quantization(mcus[i].Cb, jpeg->quantization_tab[jpeg->cc[2].qt_id]);
+    }
+
+    for (i = 0; i < total_of_mcus; i++) {
+        reverse_zig_zag(mcus[i].Y);
+        reverse_zig_zag(mcus[i].Cr);
+        reverse_zig_zag(mcus[i].Cb);
+    }
+
+    for (i = 0; i < total_of_mcus; i++) {
+        minus_correct(mcus[i].Y);
+        minus_correct(mcus[i].Cr);
+        minus_correct(mcus[i].Cb);
+    }
+
+    for (i = 0; i < total_of_mcus; i++) {
+        idct(mcus[i].Y);
+        idct(mcus[i].Cr);
+        idct(mcus[i].Cb);
+    }
+
+    mkimg(mcus, img);
+    free(mcus);
 }
 
 
@@ -341,6 +373,7 @@ int load_jpeg(const char *path, image_t *img)
     fclose(fp);
 
     parse_jpeg(&jpeg, img);
+    bitstring_destroy(&jpeg.content);
 
     return 0;
 }
