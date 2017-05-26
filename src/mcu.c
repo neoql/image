@@ -42,7 +42,7 @@ int reverse_zig_zag(int16 cc[64])
     memcpy(tmp, cc, sizeof(int16) * 64);
     for (i = 0; i < 64; i++) {
         index = ZIG_ZAG_TAB[i];
-        cc[index] = tmp[i];
+        cc[i] = tmp[index];
     }
 
     return 0;
@@ -104,7 +104,7 @@ int mkimg(mcu_t mcus[], image_t *image)
             index++;
             for (k = 0; k < 64; k++) {
                 x = j * 8 + k % 8;
-                y = i * 8 + k / 8;
+                y = i * 8 + 7 - k / 8;
 
                 Y = mcu->Y[k];
                 Cb = mcu->Cb[k];
