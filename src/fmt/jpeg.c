@@ -8,6 +8,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <jpeg.h>
+#include <mcu.h>
 
 
 #define H4BIT(x) ((uchar) ((x & 0xF0) >> 4))
@@ -300,7 +302,7 @@ void parse_color_component(int16 cc[], bitstring_t *str, huffman_table_t *dc, hu
 }
 
 
-void parse_jpeg(jpeg_t *jpeg, image_t *img)
+void decode_small_mcu_jpeg(jpeg_t *jpeg, image_t *img)
 {
     int i;
     huffman_table_t *dc, *ac;
@@ -337,8 +339,8 @@ void parse_jpeg(jpeg_t *jpeg, image_t *img)
 
     for (i = 0; i < total_of_mcus; i++) {
         reverse_quantization(mcus[i].Y, jpeg->quantization_tab[jpeg->cc[0].qt_id]);
-        reverse_quantization(mcus[i].Cr, jpeg->quantization_tab[jpeg->cc[1].qt_id]);
-        reverse_quantization(mcus[i].Cb, jpeg->quantization_tab[jpeg->cc[2].qt_id]);
+        reverse_quantization(mcus[i].Cb, jpeg->quantization_tab[jpeg->cc[1].qt_id]);
+        reverse_quantization(mcus[i].Cr, jpeg->quantization_tab[jpeg->cc[2].qt_id]);
     }
 
     for (i = 0; i < total_of_mcus; i++) {
@@ -359,8 +361,97 @@ void parse_jpeg(jpeg_t *jpeg, image_t *img)
         idct(mcus[i].Cb);
     }
 
-    mkimg(mcus, img);
+    mkimg_from_mcus(mcus, img);
     free(mcus);
+}
+
+
+void decode_big_mcu_jpeg(jpeg_t *jpeg, image_t *img)
+{
+    int i, j;
+    huffman_table_t *dc, *ac;
+    big_mcu_t *mcus;
+    uint32 total_of_mcus;
+
+
+    img_init(img, jpeg->height, jpeg->width);
+    total_of_mcus = (uint32) (ceil(img->height / 16.0) * ceil(img->width / 16.0));
+    mcus = calloc(total_of_mcus, sizeof(big_mcu_t));
+
+    for (i = 0; i < 4; i++) {
+        build_huffman_tab(&jpeg->huffman_tab[i]);
+    }
+
+    for (i = 0; i < total_of_mcus; i++) {
+        for (j = 0; j < 4; j++) {
+            dc = &jpeg->huffman_tab[jpeg->cc[0].dc_huffman_tab];
+            ac = &jpeg->huffman_tab[jpeg->cc[0].ac_huffman_tab + 2];
+            parse_color_component(mcus[i].Y[j], &jpeg->content, dc, ac);
+        }
+
+        dc = &jpeg->huffman_tab[jpeg->cc[1].dc_huffman_tab];
+        ac = &jpeg->huffman_tab[jpeg->cc[1].ac_huffman_tab + 2];
+        parse_color_component(mcus[i].Cb, &jpeg->content, dc, ac);
+
+        dc = &jpeg->huffman_tab[jpeg->cc[2].dc_huffman_tab];
+        ac = &jpeg->huffman_tab[jpeg->cc[2].ac_huffman_tab + 2];
+        parse_color_component(mcus[i].Cr, &jpeg->content, dc, ac);
+    }
+
+    for (i = 1; i < 4 * total_of_mcus; i++) {
+        mcus[i / 4].Y[i % 4][0] += mcus[(i - 1) / 4].Y[(i - 1) % 4][0];
+    }
+    for (i = 1; i < total_of_mcus; i++) {
+        mcus[i].Cr[0] += mcus[i - 1].Cr[0];
+        mcus[i].Cb[0] += mcus[i - 1].Cb[0];
+    }
+
+    for (i = 0; i < total_of_mcus; i++) {
+        for (j = 0; j < 4; j++) {
+            reverse_quantization(mcus[i].Y[j], jpeg->quantization_tab[jpeg->cc[0].qt_id]);
+        }
+        reverse_quantization(mcus[i].Cb, jpeg->quantization_tab[jpeg->cc[1].qt_id]);
+        reverse_quantization(mcus[i].Cr, jpeg->quantization_tab[jpeg->cc[2].qt_id]);
+    }
+
+    for (i = 0; i < total_of_mcus; i++) {
+        for (j = 0; j < 4; j++) {
+            reverse_zig_zag(mcus[i].Y[j]);
+        }
+        reverse_zig_zag(mcus[i].Cr);
+        reverse_zig_zag(mcus[i].Cb);
+    }
+
+    for (i = 0; i < total_of_mcus; i++) {
+        for (j = 0; j < 4; j++) {
+            minus_correct(mcus[i].Y[j]);
+        }
+        minus_correct(mcus[i].Cr);
+        minus_correct(mcus[i].Cb);
+    }
+
+    for (i = 0; i < total_of_mcus; i++) {
+        for (j = 0; j < 4; j++) {
+            idct(mcus[i].Y[j]);
+        }
+        idct(mcus[i].Cr);
+        idct(mcus[i].Cb);
+    }
+
+    mkimg_from_big_mcus(mcus, img);
+    free(mcus);
+}
+
+
+int decode_jpeg(jpeg_t *jpeg, image_t *img)
+{
+    if (jpeg->cc[0].h_sampling_factor == 2 && jpeg->cc[0].v_sampling_factor == 2) {
+        decode_big_mcu_jpeg(jpeg, img);
+    } else {
+        decode_small_mcu_jpeg(jpeg, img);
+    }
+
+    return 0;
 }
 
 
@@ -373,7 +464,7 @@ int load_jpeg(const char *path, image_t *img)
     read_info(fp, &jpeg);
     fclose(fp);
 
-    parse_jpeg(&jpeg, img);
+    decode_jpeg(&jpeg, img);
     bitstring_destroy(&jpeg.content);
 
     return 0;

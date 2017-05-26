@@ -6,6 +6,8 @@
 #include <string.h>
 #include "dct.h"
 #include <math.h>
+#include <image.h>
+#include <mcu.h>
 
 
 #define clamp(a) (a < 0 ? 0 : a > 255 ? 255 : a)
@@ -91,7 +93,7 @@ int idct(int16 cc[64])
 }
 
 
-int mkimg(mcu_t mcus[], image_t *image)
+int mkimg_from_mcus(mcu_t *mcus, image_t *image)
 {
     int i, j, k, index = 0;
     int x, y;
@@ -127,5 +129,49 @@ int mkimg(mcu_t mcus[], image_t *image)
             }
         }
     }
+    return 0;
+}
+
+
+int mkimg_from_big_mcus(big_mcu_t *mcus, image_t *image)
+{
+    big_mcu_t *mcu;
+    int x, y;
+    int i, j, m, n, index = 0;
+    color_t color;
+    double r, g ,b, Y, Cr, Cb;
+
+
+    for (i = 0; i < ceil(image->height / 16.0); i++) {
+        for (j = 0; j < ceil(image->width / 16.0); j++) {
+            mcu = mcus + index;
+            index++;
+            for (m = 0; m < 4; m++) {
+                for (n = 0; n < 64; n++) {
+                    x = j * 16 + m % 2 * 8 + n % 8;
+                    y = i * 16 + m / 2 * 8 + (7 - n / 8);
+
+                    if (x >= image->width || y >= image->height) {
+                        continue;
+                    }
+
+                    Y = mcu->Y[m][n];
+                    Cb = mcu->Cb[n];
+                    Cr = mcu->Cr[n];
+
+                    r = clamp(Y + 1.402 * Cr + 128);
+                    g = clamp(Y - 0.3441363 * Cb - 0.71413636 * Cr + 128);
+                    b = clamp(Y + 1.772 * Cb + 128);
+
+                    color.r = (uchar) r;
+                    color.g = (uchar) g;
+                    color.b = (uchar) b;
+
+                    img_set_color(image, x, y, color);
+                }
+            }
+        }
+    }
+
     return 0;
 }
