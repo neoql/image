@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 
 #define H4BIT(x) ((uchar) ((x & 0xF0) >> 4))
@@ -307,7 +308,7 @@ void parse_jpeg(jpeg_t *jpeg, image_t *img)
     uint32 total_of_mcus;
 
     img_init(img, jpeg->height, jpeg->width);
-    total_of_mcus = img->height * img->width / 64;
+    total_of_mcus = (uint32) (ceil(img->height / 8.0) * ceil(img->width / 8.0));
     mcus = calloc(total_of_mcus, sizeof(mcu_t));
 
     for (i = 0; i < 4; i++) {

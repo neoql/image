@@ -5,6 +5,7 @@
 #include "mcu.h"
 #include <string.h>
 #include "dct.h"
+#include <math.h>
 
 
 #define clamp(a) (a < 0 ? 0 : a > 255 ? 255 : a)
@@ -98,13 +99,17 @@ int mkimg(mcu_t mcus[], image_t *image)
     color_t color;
     double r, g ,b, Y, Cr, Cb;
 
-    for (i = 0; i < image->height / 8; i++) {
-        for (j = 0; j < image->width / 8; j++) {
+    for (i = 0; i < ceil(image->height / 8.0); i++) {
+        for (j = 0; j < ceil(image->width / 8.0); j++) {
             mcu = mcus + index;
             index++;
             for (k = 0; k < 64; k++) {
                 x = j * 8 + k % 8;
                 y = i * 8 + 7 - k / 8;
+
+                if (x >= image->width || y >= image->height) {
+                    continue;
+                }
 
                 Y = mcu->Y[k];
                 Cb = mcu->Cb[k];
