@@ -8,8 +8,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include <jpeg.h>
-#include <mcu.h>
 
 
 #define H4BIT(x) ((uchar) ((x & 0xF0) >> 4))

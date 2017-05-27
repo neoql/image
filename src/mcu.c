@@ -7,8 +7,6 @@
 #include "dct.h"
 #include <math.h>
 #include <stdlib.h>
-#include <image.h>
-#include <mcu.h>
 
 
 #define clamp(a) (a < 0 ? 0 : a > 255 ? 255 : a)
