@@ -6,6 +6,7 @@
 #include <string.h>
 #include "dct.h"
 #include <math.h>
+#include <stdlib.h>
 #include <image.h>
 #include <mcu.h>
 
@@ -135,11 +136,14 @@ int mkimg_from_mcus(mcu_t *mcus, image_t *image)
 
 int mkimg_from_big_mcus(big_mcu_t *mcus, image_t *image)
 {
-    big_mcu_t *mcu;
     int x, y;
     int i, j, m, n, index = 0;
+    double (*mat)[3];
+    big_mcu_t *mcu;
     color_t color;
     double r, g ,b, Y, Cr, Cb;
+
+    mat = calloc(image->height * image->width, sizeof(double[3]));
 
 
     for (i = 0; i < ceil(image->height / 16.0); i++) {
@@ -156,22 +160,63 @@ int mkimg_from_big_mcus(big_mcu_t *mcus, image_t *image)
                     }
 
                     Y = mcu->Y[m][n];
+
+                    mat[y * image->width + x][0] = Y;
+                }
+            }
+
+        }
+    }
+
+    index = 0;
+
+    for (i = 0; i < ceil(image->height / 16.0); i++) {
+        for (j = 0; j < ceil(image->width / 16.0); j++) {
+            mcu = mcus + index;
+            index++;
+            if (index == 30) {
+                index = 30;
+            }
+            for (m = 0; m < 4; m++) {
+                for (n = 0; n < 64; n++) {
+                    x = j * 16 + m % 2 + n % 8 * 2;
+                    y = i * 16 + m / 2 + (7 - n / 8) * 2;
+
+                    if (x >= image->width || y >= image->height) {
+                        continue;
+                    }
+
                     Cb = mcu->Cb[n];
                     Cr = mcu->Cr[n];
 
-                    r = clamp(Y + 1.402 * Cr + 128);
-                    g = clamp(Y - 0.3441363 * Cb - 0.71413636 * Cr + 128);
-                    b = clamp(Y + 1.772 * Cb + 128);
-
-                    color.r = (uchar) r;
-                    color.g = (uchar) g;
-                    color.b = (uchar) b;
-
-                    img_set_color(image, x, y, color);
+                    mat[y * image->width + x][1] = Cb;
+                    mat[y * image->width + x][2] = Cr;
                 }
             }
+
         }
     }
+
+
+    for (x = 0; x < image->width; x++) {
+        for (y = 0; y < image->height; y++) {
+            Y  = mat[y * image->width + x][0];
+            Cb = mat[y * image->width + x][1];
+            Cr = mat[y * image->width + x][2];
+
+            r = clamp(Y + 1.402 * Cr + 128);
+            g = clamp(Y - 0.3441363 * Cb - 0.71413636 * Cr + 128);
+            b = clamp(Y + 1.772 * Cb + 128);
+
+            color.r = (uchar) r;
+            color.g = (uchar) g;
+            color.b = (uchar) b;
+
+            img_set_color(image, x, y, color);
+        }
+    }
+
+    free(mat);
 
     return 0;
 }
