@@ -48,6 +48,19 @@ typedef struct {
     bitstring_t content;                // 图像内容
 } jpeg_t;
 
+typedef struct {
+    int16 Y[64];
+    int16 Cr[64];
+    int16 Cb[64];
+} mcu_t;
+
+
+typedef struct {
+    int16 Y[4][64];
+    int16 Cr[64];
+    int16 Cb[64];
+} big_mcu_t;
+
 extern int load_jpeg(const char *path, image_t *img);
 extern int save_as_jpeg(const image_t *img, const char *path);
 

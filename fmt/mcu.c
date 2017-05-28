@@ -2,7 +2,7 @@
 // Created by moons on 17-5-23.
 //
 
-#include "mcu.h"
+#include "jpeg.h"
 #include <string.h>
 #include "../transform/dct.h"
 #include <math.h>

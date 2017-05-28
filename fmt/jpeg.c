@@ -3,7 +3,6 @@
 //
 
 #include "jpeg.h"
-#include "mcu.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -12,6 +11,14 @@
 
 #define H4BIT(x) ((uchar) ((x & 0xF0) >> 4))
 #define L4BIT(x) ((uchar) (x & 0x0F))
+
+
+extern int reverse_quantization(int16 cc[64], uint16 quantization_tab[64]);
+extern int reverse_zig_zag(int16 cc[64]);
+extern int minus_correct(int16 cc[64]);
+extern int idct(int16 cc[64]);
+extern int mkimg_from_mcus(mcu_t *mcus, image_t *image);
+extern int mkimg_from_big_mcus(big_mcu_t *mcus, image_t *image);
 
 
 uint16 read_uint16(FILE *fp)
