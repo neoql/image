@@ -67,7 +67,7 @@ int img_clone(const image_t *src, image_t *dst)
 }
 
 
-extern int rgb2gray(const image_t *src, image_t *dst)
+int rgb2gray(const image_t *src, image_t *dst)
 {
     int i, j;
     uchar gray;
