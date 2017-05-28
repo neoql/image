@@ -6,7 +6,7 @@
 #define IMAGE_BITSTRING_H
 
 
-#include "image.h"
+#include "../img/image.h"
 typedef unsigned char bit_t;
 
 #define MIN_SIZE 65535

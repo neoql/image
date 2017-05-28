@@ -5,8 +5,8 @@
 #ifndef IMAGE_JPEG_H
 #define IMAGE_JPEG_H
 
-#include "image.h"
-#include "bitstring.h"
+#include "../img/image.h"
+#include "../util/bitstring.h"
 
 #define SOI     0xFFD8                  // 图像开始
 #define APP0    0xFFE0                  // 应用程序保留标记0

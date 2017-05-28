@@ -3,7 +3,7 @@
 //
 
 #include <stdio.h>
-#include "bitstring.h"
+#include "../util/bitstring.h"
 
 
 int main(int argc, char *argv[])

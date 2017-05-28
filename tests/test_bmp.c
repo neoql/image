@@ -1,4 +1,4 @@
-#include "bitmap.h"
+#include "../fmt/bitmap.h"
 #include <stdio.h>
 
 

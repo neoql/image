@@ -4,7 +4,7 @@
 
 #include "bitstring.h"
 #include <stdlib.h>
-#include <bitstring.h>
+#include "bitstring.h"
 
 
 int bitstring_init(bitstring_t *str)

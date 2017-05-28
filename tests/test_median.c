@@ -2,8 +2,8 @@
 // Created by moons on 17-5-18.
 //
 
-#include "bitmap.h"
-#include "filter.h"
+#include "../fmt/bitmap.h"
+#include "../filter/filter.h"
 
 
 int main(int argc, char* argv[])

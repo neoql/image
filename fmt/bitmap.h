@@ -6,7 +6,7 @@
 #define TEST_JPEG_BITMAP_H
 
 
-#include "image.h"
+#include "../img/image.h"
 
 typedef struct {
     uint16 bfType;                      // 标识"BM"

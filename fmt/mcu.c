@@ -4,7 +4,7 @@
 
 #include "mcu.h"
 #include <string.h>
-#include "dct.h"
+#include "../transform/dct.h"
 #include <math.h>
 #include <stdlib.h>
 

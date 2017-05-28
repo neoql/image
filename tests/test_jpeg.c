@@ -2,8 +2,8 @@
 // Created by moons on 17-5-22.
 //
 
-#include "jpeg.h"
-#include "bitmap.h"
+#include "../fmt/jpeg.h"
+#include "../fmt/bitmap.h"
 
 
 int main(int argc, char *argv[])

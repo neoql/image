@@ -5,7 +5,7 @@
 #ifndef IMAGE_MCU_H
 #define IMAGE_MCU_H
 
-#include "image.h"
+#include "../img/image.h"
 
 typedef struct {
     int16 Y[64];
