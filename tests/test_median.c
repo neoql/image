@@ -8,17 +8,17 @@
 
 int main(int argc, char* argv[])
 {
-    image_t img, dest;
+    image_t *img, *dest;
 
-    load_bmp(argv[1], &img);
+    img = load_bmp(argv[1]);
 
-    median_filter(&img, &img, 1);
+    dest = median_filter(img, 1);
 
-    save_as_bmp(&dest, argv[2]);
+    save_as_bmp(dest, argv[2]);
 
 
-    img_destroy(&img);
-    img_destroy(&dest);
+    img_destroy(img);
+    img_destroy(dest);
 
     return 0;
 }

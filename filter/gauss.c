@@ -3,8 +3,8 @@
 //
 
 #include "filter.h"
-#include <math.h>
 #include <stdlib.h>
+#include <math.h>
 
 
 #define PI 3.1415926
@@ -182,22 +182,20 @@ static void vfilter(image_t *dest, const image_t *src, double sigma, int radius)
 }
 
 
-int gauss_filter(const image_t *src, image_t *dst, double sigma)
+image_t * gauss_filter(const image_t *src, double sigma)
 {
-    image_t tmp;
+    image_t *tmp, *dst;
     int radius;
 
-    img_init(&tmp, src->height, src->width);
-    if (src != dst) {
-        img_init(dst, src->height, src->width);
-    }
+    tmp = create_empty_img(src->height, src->width);
+    dst = create_empty_img(src->height, src->width);
 
     radius = (int) ceil(sigma * 3);
 
-    hfilter(&tmp, src, sigma, radius);
-    vfilter(dst, &tmp, sigma, radius);
+    hfilter(tmp, src, sigma, radius);
+    vfilter(dst, tmp, sigma, radius);
 
-    img_destroy(&tmp);
+    img_destroy(tmp);
 
-    return 0;
+    return dst;
 }

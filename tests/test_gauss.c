@@ -9,19 +9,20 @@
 
 int main(int argc, char *argv[])
 {
-    image_t img, dst;
+    image_t *img, *dst;
 
     if (argc < 3) {
         printf("Usage : <src_path> <dst_path>.\n");
     }
 
-    load_bmp(argv[1], &img);
+    img = load_bmp(argv[1]);
 
-    gauss_filter(&img, &img, 50);
-    save_as_bmp(&img, argv[2]);
+    dst = gauss_filter(img, 10);
 
-    img_destroy(&img);
-//    img_destroy(&dst);
+    save_as_bmp(dst, argv[2]);
+
+    img_destroy(img);
+    img_destroy(dst);
 
     return 0;
 }

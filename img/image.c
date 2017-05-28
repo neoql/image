@@ -6,20 +6,24 @@
 #include <stdlib.h>
 
 
-int img_init(image_t *img, uint32 height, uint32 width)
+image_t * create_empty_img(uint32 height, uint32 width)
 {
+    image_t *img;
+
+    img = malloc(sizeof(image_t));
+
     img->height = height;
     img->width = width;
-
     img->points = calloc(height * width, sizeof(color_t));
 
-    return 0;
+    return img;
 }
 
 
 int img_destroy(image_t *img)
 {
     free(img->points);
+    free(img);
     return 0;
 }
 
@@ -50,12 +54,13 @@ int img_set_color(image_t *img, int x, int y, color_t color)
 }
 
 
-int img_clone(const image_t *src, image_t *dst)
+image_t * img_clone(const image_t *src)
 {
     color_t color;
     int i, j;
+    image_t *dst;
 
-    img_init(dst, src->height, src->width);
+    dst = create_empty_img(src->height, src->width);
     for (i = 0; i < src->height; i++) {
         for (j = 0; j < src->width; j++) {
             img_get_color(src, j, i, &color);
@@ -63,20 +68,18 @@ int img_clone(const image_t *src, image_t *dst)
         }
     }
 
-    return 0;
+    return dst;
 }
 
 
-int rgb2gray(const image_t *src, image_t *dst)
+image_t * rgb2gray(const image_t *src)
 {
     int i, j;
     uchar gray;
     color_t color;
+    image_t *dst;
 
-    if (src != dst) {
-        img_init(dst, src->height, src->width);
-    }
-    img_init(dst, src->height, src->width);
+    dst = create_empty_img(src->height, src->width);
     for (i = 0; i < src->height; i++) {
         for (j = 0; j < src->width; j++) {
             img_get_color(src, j, i, &color);
@@ -86,5 +89,5 @@ int rgb2gray(const image_t *src, image_t *dst)
         }
     }
 
-    return 0;
+    return dst;
 }

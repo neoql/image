@@ -7,21 +7,26 @@
 #include "bitstring.h"
 
 
-int bitstring_init(bitstring_t *str)
+bitstring_t * create_bitstring()
 {
+    bitstring_t *str;
+
+    str = malloc(sizeof(bitstring_t));
+
     str->__content = calloc(MIN_SIZE, sizeof(bit_t));
     str->__size = MIN_SIZE;
 
     str->__head = str->__content;
     str->__end  = str->__content;
 
-    return 0;
+    return str;
 }
 
 
 int bitstring_destroy(bitstring_t *str)
 {
     free(str->__content);
+    free(str);
     return 0;
 }
 

@@ -25,11 +25,11 @@ typedef struct {
 } image_t;
 
 
-extern int img_init(image_t *img, uint32 height, uint32 width);
+extern image_t * create_empty_img(uint32 height, uint32 width);
 extern int img_destroy(image_t *img);
 extern int img_get_color(const image_t *img, int x, int y, color_t *color);
 extern int img_set_color(image_t *img, int x, int y, color_t color);
-extern int img_clone(const image_t *src, image_t *dst);
-extern int rgb2gray(const image_t *src, image_t *dst);
+extern image_t * img_clone(const image_t *src);
+extern image_t * rgb2gray(const image_t *src);
 
 #endif //TEST_JPEG_IMAGE_H

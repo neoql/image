@@ -38,7 +38,7 @@ typedef struct {
 } bitmap_t;
 
 
-extern int load_bmp(const char *path, image_t *img);
+extern image_t * load_bmp(const char *path);
 extern int save_as_bmp(const image_t *img, const char *path);
 
 #endif //TEST_JPEG_BITMAP_H

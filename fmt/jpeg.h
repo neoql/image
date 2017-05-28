@@ -45,7 +45,7 @@ typedef struct {
     uchar  cc_total;                    // 颜色分量数 1:灰度图 3:YCrCb 4:CMYK
     color_component_t cc[4];            // 颜色分量
     huffman_table_t huffman_tab[4];     // 哈夫曼表
-    bitstring_t content;                // 图像内容
+    bitstring_t *data;                // 图像内容
 } jpeg_t;
 
 typedef struct {
@@ -61,7 +61,7 @@ typedef struct {
     int16 Cb[64];
 } big_mcu_t;
 
-extern int load_jpeg(const char *path, image_t *img);
+extern image_t * load_jpeg(const char *path);
 extern int save_as_jpeg(const image_t *img, const char *path);
 
 #endif //IMAGE_JPEG_H

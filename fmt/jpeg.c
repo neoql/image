@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <img/image.h>
 
 
 #define H4BIT(x) ((uchar) ((x & 0xF0) >> 4))
@@ -157,13 +158,11 @@ void read_info(FILE *fp, jpeg_t *jpeg)
     uint16 sign;
     uchar tmp;
 
-    bitstring_init(&jpeg->content);
-
     while (1) {
         fread(&tmp, 1, 1, fp);
 
         if (tmp != 0xFF) {
-            bitstring_append_byte(&jpeg->content, tmp);
+            bitstring_append_byte(jpeg->data, tmp);
             continue;
         }
 
@@ -196,7 +195,7 @@ void read_info(FILE *fp, jpeg_t *jpeg)
             case EOI:
                 return;
             case 0xFF00:
-                bitstring_append_byte(&jpeg->content, 0xFF);
+                bitstring_append_byte(jpeg->data, 0xFF);
                 break;
             default:
                 read_other(fp, jpeg);
@@ -314,7 +313,7 @@ void decode_small_mcu_jpeg(jpeg_t *jpeg, image_t *img)
     mcu_t *mcus;
     uint32 total_of_mcus;
 
-    img_init(img, jpeg->height, jpeg->width);
+
     total_of_mcus = (uint32) (ceil(img->height / 8.0) * ceil(img->width / 8.0));
     mcus = calloc(total_of_mcus, sizeof(mcu_t));
 
@@ -325,15 +324,15 @@ void decode_small_mcu_jpeg(jpeg_t *jpeg, image_t *img)
     for (i = 0; i < total_of_mcus; i++) {
         dc = &jpeg->huffman_tab[jpeg->cc[0].dc_huffman_tab];
         ac = &jpeg->huffman_tab[jpeg->cc[0].ac_huffman_tab + 2];
-        parse_color_component(mcus[i].Y, &jpeg->content, dc, ac);
+        parse_color_component(mcus[i].Y, jpeg->data, dc, ac);
 
         dc = &jpeg->huffman_tab[jpeg->cc[1].dc_huffman_tab];
         ac = &jpeg->huffman_tab[jpeg->cc[1].ac_huffman_tab + 2];
-        parse_color_component(mcus[i].Cb, &jpeg->content, dc, ac);
+        parse_color_component(mcus[i].Cb, jpeg->data, dc, ac);
 
         dc = &jpeg->huffman_tab[jpeg->cc[2].dc_huffman_tab];
         ac = &jpeg->huffman_tab[jpeg->cc[2].ac_huffman_tab + 2];
-        parse_color_component(mcus[i].Cr, &jpeg->content, dc, ac);
+        parse_color_component(mcus[i].Cr, jpeg->data, dc, ac);
     }
 
     for (i = 1; i < total_of_mcus; i++) {
@@ -379,7 +378,6 @@ void decode_big_mcu_jpeg(jpeg_t *jpeg, image_t *img)
     uint32 total_of_mcus;
 
 
-    img_init(img, jpeg->height, jpeg->width);
     total_of_mcus = (uint32) (ceil(img->height / 16.0) * ceil(img->width / 16.0));
     mcus = calloc(total_of_mcus, sizeof(big_mcu_t));
 
@@ -391,16 +389,16 @@ void decode_big_mcu_jpeg(jpeg_t *jpeg, image_t *img)
         for (j = 0; j < 4; j++) {
             dc = &jpeg->huffman_tab[jpeg->cc[0].dc_huffman_tab];
             ac = &jpeg->huffman_tab[jpeg->cc[0].ac_huffman_tab + 2];
-            parse_color_component(mcus[i].Y[j], &jpeg->content, dc, ac);
+            parse_color_component(mcus[i].Y[j], jpeg->data, dc, ac);
         }
 
         dc = &jpeg->huffman_tab[jpeg->cc[1].dc_huffman_tab];
         ac = &jpeg->huffman_tab[jpeg->cc[1].ac_huffman_tab + 2];
-        parse_color_component(mcus[i].Cb, &jpeg->content, dc, ac);
+        parse_color_component(mcus[i].Cb, jpeg->data, dc, ac);
 
         dc = &jpeg->huffman_tab[jpeg->cc[2].dc_huffman_tab];
         ac = &jpeg->huffman_tab[jpeg->cc[2].ac_huffman_tab + 2];
-        parse_color_component(mcus[i].Cr, &jpeg->content, dc, ac);
+        parse_color_component(mcus[i].Cr, jpeg->data, dc, ac);
     }
 
     for (i = 1; i < 4 * total_of_mcus; i++) {
@@ -460,17 +458,22 @@ int decode_jpeg(jpeg_t *jpeg, image_t *img)
 }
 
 
-int load_jpeg(const char *path, image_t *img)
+image_t * load_jpeg(const char *path)
 {
     FILE *fp;
     jpeg_t jpeg;
+    image_t *img;
+
+    jpeg.data = create_bitstring();
 
     fp = fopen(path, "rb");
     read_info(fp, &jpeg);
     fclose(fp);
 
-    decode_jpeg(&jpeg, img);
-    bitstring_destroy(&jpeg.content);
+    img = create_empty_img(jpeg.height, jpeg.width);
 
-    return 0;
+    decode_jpeg(&jpeg, img);
+    bitstring_destroy(jpeg.data);
+
+    return img;
 }

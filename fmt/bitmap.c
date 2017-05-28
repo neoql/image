@@ -8,7 +8,7 @@
 #include <string.h>
 
 
-int load_bmp(const char *path, image_t *img)
+image_t * load_bmp(const char *path)
 {
     FILE *fp;
     bitmap_t *bmp;
@@ -16,6 +16,7 @@ int load_bmp(const char *path, image_t *img)
     uchar *p;
     int line_index;
     color_t color;
+    image_t *img;
 
     fp = fopen(path, "rb");
 
@@ -47,7 +48,7 @@ int load_bmp(const char *path, image_t *img)
     fread(bmp->image, 1, bmp->info_header.biSizeImage, fp);
     fclose(fp);
 
-    img_init(img, bmp->info_header.biHeight, bmp->info_header.biWidth);
+    img = create_empty_img(bmp->info_header.biHeight, bmp->info_header.biWidth);
 
     for (y = 0; y < img->height; y++) {
         for (x = 0; x < img->width; x++) {
@@ -64,7 +65,7 @@ int load_bmp(const char *path, image_t *img)
     free(bmp->image);
     free(bmp);
 
-    return 0;
+    return img;
 }
 
 
